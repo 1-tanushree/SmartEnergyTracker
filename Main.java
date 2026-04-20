@@ -137,7 +137,7 @@ public class Main {
         }
 
         // ── Create device and add to all structures ─
-        Device newDevice = new Device(name, wattage, category);
+        Device newDevice = new Device(name, wattage, models.DeviceCategory.valueOf(category));
         deviceManager.addDevice(newDevice);
         deviceGraph.addDevice(newDevice);     // also add to graph as isolated node
 
@@ -249,7 +249,7 @@ public class Main {
         }
 
         // M3 handles all the Stream + Lambda magic here
-        energyAnalyzer.displayReport(records);
+        energyAnalyzer.printSummaryReport(records);
     }
 
     // ══════════════════════════════════════════════
@@ -269,7 +269,7 @@ public class Main {
             return;
         }
 
-        carbonCalc.displayCarbonReport(records);
+        carbonCalc.printCarbonReport(records);
     }
 
     // ══════════════════════════════════════════════
@@ -389,7 +389,7 @@ public class Main {
         double totalWatts = deviceGraph.clusterTotalWattage(cluster);
         System.out.printf("%n  Total cluster wattage: %.1fW%n", totalWatts);
         System.out.printf("  Estimated hourly cost: ₹%.2f%n",
-                (totalWatts / 1000.0) * Constants.TARIFF_RATE);
+                (totalWatts / 1000.0) * Constants.TARIFF_RATE_PER_KWH);
     }
 
     // ══════════════════════════════════════════════
@@ -459,7 +459,11 @@ public class Main {
         // Also call M3's analyzer for stream-based top waster
         List<UsageRecord> records = energyManager.getAllRecords();
         if (!records.isEmpty()) {
-            energyAnalyzer.displayTopWaster(records);
+            energyAnalyzer.getTopEnergyWaster(records).ifPresent(record -> {
+                System.out.println("  [Stream-based Analysis]");
+                System.out.println("  🔴 Top energy waster: " + record.getDevice().getName());
+                System.out.println("     Wattage: " + record.getDevice().getWattage() + "W");
+            });
         }
     }
 
