@@ -3,78 +3,30 @@ package graph;
 import models.Device;
 import java.util.*;
 
-/**
- * DeviceGraph.java — Member 4
- *
- * Represents devices as a GRAPH where edges mean two devices
- * are "co-running" (used at the same time, e.g. AC + Fan + Light).
- *
- * Why Graph? Real energy analysis needs to know which devices
- * run together — that's a cluster. BFS finds all devices in
- * the same cluster starting from any one device.
- *
- * Data Structure Used:
- *   Adjacency List → Map<Device, List<Device>>
- *
- * Visual Example:
- *   AC ──── Fan
- *   |
- *   Light ── TV
- *
- *   adjacencyList = {
- *       AC    : [Fan, Light]
- *       Fan   : [AC]
- *       Light : [AC, TV]
- *       TV    : [Light]
- *   }
- *
- * BFS from AC → finds cluster: AC, Fan, Light, TV
- */
 public class DeviceGraph {
 
-    // ─────────────────────────────────────────────
+ 
     //  Core Data Structure
     //  Key   = a Device (node in the graph)
-    //  Value = List of Devices connected to it (edges)
-    // ─────────────────────────────────────────────
+    //  Value = List of Devices connected to it 
+   
     private final Map<Device, List<Device>> adjacencyList;
 
-    // ─────────────────────────────────────────────
-    //  Constructor
-    // ─────────────────────────────────────────────
+  //constructor 
     public DeviceGraph() {
-        // LinkedHashMap preserves insertion order for consistent display
+       
         this.adjacencyList = new LinkedHashMap<>();
     }
 
-    // ══════════════════════════════════════════════
-    //  ADD DEVICE  (adds a node to the graph)
-    // ══════════════════════════════════════════════
 
-    /**
-     * Adds a device as a node in the graph.
-     * A device with no connections is still a valid node (isolated node).
-     *
-     * @param device  the Device to add
-     */
     public void addDevice(Device device) {
         // putIfAbsent → only adds if device isn't already in graph
         adjacencyList.putIfAbsent(device, new ArrayList<>());
     }
 
-    // ══════════════════════════════════════════════
-    //  CONNECT DEVICES  (adds an edge)
-    // ══════════════════════════════════════════════
-
-    /**
-     * Connects two devices — marks them as co-running.
-     * This is an UNDIRECTED edge: if A connects to B, B also connects to A.
-     *
-     * @param device1  first device
-     * @param device2  second device
-     */
+    //connecting the device 
     public void connectDevices(Device device1, Device device2) {
-        // Make sure both devices exist as nodes first
+       
         addDevice(device1);
         addDevice(device2);
 
@@ -86,25 +38,9 @@ public class DeviceGraph {
                 + " ↔ " + device2.getName());
     }
 
-    // ══════════════════════════════════════════════
-    //  BFS TRAVERSAL  — Find Co-running Cluster
-    // ══════════════════════════════════════════════
-
-    /**
-     * BFS (Breadth-First Search) starting from a given device.
-     * Finds ALL devices reachable from it = the "co-running cluster".
-     *
-     * BFS Algorithm:
-     *   1. Start at source device, mark it visited
-     *   2. Add it to a Queue
-     *   3. While queue is not empty:
-     *      a. Remove front device
-     *      b. Print it
-     *      c. Add all its unvisited neighbors to queue
-     *
-     * @param startDevice  the device to start BFS from
-     * @return             list of all devices in the same cluster
-     */
+//with the help of bfs it clister all the devices connected 
+    //queue is used 
+    //visit the node marke it visited add it in the queue then explore it;s neighbore 
     public List<Device> bfsCluster(Device startDevice) {
         List<Device> cluster = new ArrayList<>();  // result list
 
@@ -115,10 +51,10 @@ public class DeviceGraph {
             return cluster;
         }
 
-        // visited set → prevents revisiting / infinite loops
+        // visited set → prevents revisiting
         Set<Device> visited = new HashSet<>();
 
-        // Queue → BFS uses Queue (FIFO), not Stack
+        // Queue → BFS uses Queue (FIFO)
         Queue<Device> queue = new LinkedList<>();
 
         // Step 1: Initialize with start device
@@ -150,20 +86,7 @@ public class DeviceGraph {
         return cluster;
     }
 
-    // ══════════════════════════════════════════════
-    //  FIND ALL CLUSTERS  (all connected components)
-    // ══════════════════════════════════════════════
-
-    /**
-     * Finds ALL clusters in the graph (connected components).
-     * Useful when some devices are independent of others.
-     *
-     * Example:
-     *   Cluster 1: AC, Fan, Light
-     *   Cluster 2: Washing Machine (runs alone)
-     *
-     * @return  list of clusters, each cluster is a list of devices
-     */
+   //find the cluster 
     public List<List<Device>> findAllClusters() {
         List<List<Device>> allClusters = new ArrayList<>();
         Set<Device> globalVisited = new HashSet<>();
@@ -206,14 +129,9 @@ public class DeviceGraph {
         return cluster;
     }
 
-    // ══════════════════════════════════════════════
     //  DISPLAY GRAPH  (show all connections)
-    // ══════════════════════════════════════════════
 
-    /**
-     * Displays the full adjacency list — all devices and their connections.
-     * Useful for debugging and showing the graph structure in the CLI.
-     */
+   
     public void displayGraph() {
         if (adjacencyList.isEmpty()) {
             System.out.println("  [Graph is empty — no devices added]");
@@ -243,17 +161,10 @@ public class DeviceGraph {
         }
     }
 
-    // ══════════════════════════════════════════════
+  
     //  CLUSTER TOTAL WATTAGE
-    // ══════════════════════════════════════════════
-
-    /**
-     * Calculates the total wattage of a cluster of co-running devices.
-     * This helps identify power-heavy combinations.
-     *
-     * @param cluster  list of devices in a cluster (from bfsCluster)
-     * @return         total wattage of all devices in cluster
-     */
+  
+   //scanning the co-runnung devices also 
     public double clusterTotalWattage(List<Device> cluster) {
         double total = 0;
         for (Device d : cluster) {
@@ -262,14 +173,9 @@ public class DeviceGraph {
         return total;
     }
 
-    // ══════════════════════════════════════════════
+  
     //  DISPLAY ALL CLUSTERS WITH WATTAGE
-    // ══════════════════════════════════════════════
-
-    /**
-     * Displays every cluster found in the graph along with
-     * total combined wattage of each cluster.
-     */
+  
     public void displayAllClusters() {
         List<List<Device>> clusters = findAllClusters();
 
@@ -294,10 +200,9 @@ public class DeviceGraph {
         }
     }
 
-    // ══════════════════════════════════════════════
+ 
     //  UTILITY
-    // ══════════════════════════════════════════════
-
+   
     /** Returns true if the device exists in the graph */
     public boolean containsDevice(Device device) {
         return adjacencyList.containsKey(device);
@@ -308,7 +213,7 @@ public class DeviceGraph {
         return adjacencyList.size();
     }
 
-    /** Returns the adjacency list (for advanced use by Main.java) */
+    /** Returns the adjacency list */
     public Map<Device, List<Device>> getAdjacencyList() {
         return adjacencyList;
     }
