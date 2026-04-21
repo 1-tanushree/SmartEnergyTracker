@@ -11,62 +11,27 @@ import util.Constants;
 import java.util.*;
 import java.time.LocalDate;
 
-/**
- * Main.java — Member 4
- *
- * The ENTRY POINT and INTEGRATION HUB of the Smart Energy Tracker.
- *
- * This class:
- *  1. Runs a while(true) CLI menu loop
- *  2. Takes user input and validates it
- *  3. Calls methods from ALL other members' classes
- *  4. Displays results neatly on the command line
- *
- * Menu Structure:
- *  ┌─────────────────────────────────────┐
- *  │  1. Add Device                      │
- *  │  2. View All Devices                │
- *  │  3. Log Usage                       │
- *  │  4. Show Energy Report              │
- *  │  5. Show Carbon Footprint           │
- *  │  6. Show Usage Tree (BST)           │
- *  │  7. Connect Devices (Graph)         │
- *  │  8. Find Co-running Cluster (BFS)   │
- *  │  9. Show All Clusters               │
- *  │  10. Export Report to File          │
- *  │  11. Top Energy Waster              │
- *  │  0. Exit                            │
- *  └─────────────────────────────────────┘
- */
 public class Main {
 
-    // ─────────────────────────────────────────────
-    //  Shared objects — created once, used everywhere
-    // ─────────────────────────────────────────────
+   //object creation 
     private static DeviceManager   deviceManager   = new DeviceManager();
     private static EnergyManager   energyManager   = new EnergyManager();
     private static EnergyAnalyzer  energyAnalyzer  = new EnergyAnalyzer();
     private static CarbonCalculator carbonCalc     = new CarbonCalculator();
     private static DeviceGraph     deviceGraph     = new DeviceGraph();
     private static UsageTree       usageTree       = new UsageTree();
-
-    // Scanner reads user input from the keyboard
+    // Scanner for the input 
     private static Scanner scanner = new Scanner(System.in);
 
-    // ══════════════════════════════════════════════
-    //  MAIN METHOD — Program starts here
-    // ══════════════════════════════════════════════
     public static void main(String[] args) {
 
-        printBanner();   // show welcome screen
-
-        // ── The main loop ──────────────────────────
-        // Runs FOREVER until user chooses 0 (Exit)
+        printBanner();   
+       
         while (true) {
-            printMenu();                   // display options
-            int choice = readIntInput();   // read & validate choice
+            printMenu();                   
+            int choice = readIntInput();  
 
-            // Route to the right method based on choice
+            
             switch (choice) {
                 case 1  -> addDevice();
                 case 2  -> viewAllDevices();
@@ -82,25 +47,18 @@ public class Main {
                 case 0  -> {
                     System.out.println("\n  Goodbye! Save energy. 🌱");
                     scanner.close();
-                    System.exit(0);       // cleanly exit the program
+                    System.exit(0);      
                 }
                 default -> System.out.println(
                         "\n  [Invalid option — please enter 0 to 11]");
             }
 
-            // Small pause before showing menu again
+           
             System.out.println();
         }
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 1 — Add Device
-    // ══════════════════════════════════════════════
-
-    /**
-     * Asks user for device details and adds it to the system.
-     * Validates: name cannot be empty, wattage cannot be negative.
-     */
+//device detais with validation of name can't be empty and wattage can't me -ve  
     private static void addDevice() {
         System.out.println("\n  ── Add New Device ──");
 
@@ -114,44 +72,39 @@ public class Main {
             }
         }
 
-        // ── Get wattage (must be positive) ────────
         double wattage = -1;
-        while (wattage <= 0) {
+        while (wattage <= 0)
+            {
             System.out.print("  Enter wattage (W): ");
             wattage = readDoubleInput();
-            if (wattage <= 0) {
+            if (wattage <= 0)
+              {
                 System.out.println("  [Wattage must be greater than 0 — try again]");
-            }
-        }
+              }
+           }
 
-        // ── Get category ──────────────────────────
+       
         System.out.println("  Categories: AC / LIGHT / APPLIANCE");
         System.out.print("  Enter category: ");
         String category = scanner.nextLine().trim().toUpperCase();
 
-        // Validate category — default to APPLIANCE if unrecognized
+        
         if (!category.equals("AC") && !category.equals("LIGHT")
                 && !category.equals("APPLIANCE")) {
             System.out.println("  [Unrecognized category — defaulting to APPLIANCE]");
             category = "APPLIANCE";
         }
 
-        // ── Create device and add to all structures ─
+        //  Creating  device and add to all structures 
         Device newDevice = new Device(name, wattage, category);
         deviceManager.addDevice(newDevice);
-        deviceGraph.addDevice(newDevice);     // also add to graph as isolated node
-
+        deviceGraph.addDevice(newDevice);     
+        
         System.out.println("  ✓ Device added: " + newDevice);
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 2 — View All Devices
-    // ══════════════════════════════════════════════
-
-    /**
-     * Displays all devices stored in DeviceManager.
-     * Uses M2's display method.
-     */
+  
+   //view all the devices 
     private static void viewAllDevices() {
         System.out.println("\n  ── All Registered Devices ──");
         List<Device> devices = deviceManager.getAllDevices();
@@ -162,7 +115,7 @@ public class Main {
         }
 
         System.out.printf("  %-5s %-20s %-10s %-12s%n",
-                "#", "Name", "Wattage", "Category");
+                "#", "Name", "Wattage", "Category"); 
         System.out.println("  " + "─".repeat(50));
 
         int index = 1;
@@ -172,14 +125,7 @@ public class Main {
         }
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 3 — Log Usage
-    // ══════════════════════════════════════════════
-
-    /**
-     * Logs how many hours a device was used today.
-     * Also inserts the device into the UsageTree with its daily kWh.
-     */
+    //how many hrs the use of the perticular device 
     private static void logUsage() {
         System.out.println("\n  ── Log Device Usage ──");
 
@@ -194,10 +140,9 @@ public class Main {
             System.out.println("  " + (i + 1) + ". " + devices.get(i).getName());
         }
 
-        // Pick a device
+       
         System.out.print("  Select device number: ");
-        int choice = readIntInput() - 1;  // convert to 0-based index
-
+        int choice = readIntInput() - 1; 
         if (choice < 0 || choice >= devices.size()) {
             System.out.println("  [Invalid selection]");
             return;
@@ -205,7 +150,7 @@ public class Main {
 
         Device selected = devices.get(choice);
 
-        // Get hours used (must be 0–24)
+    //get hrs from user 
         double hours = -1;
         while (hours < 0 || hours > 24) {
             System.out.print("  Hours used today (0–24): ");
@@ -215,30 +160,20 @@ public class Main {
             }
         }
 
-        // Calculate daily kWh: (wattage / 1000) × hours
+        // Calculate daily kWh 
         double dailyKwh = (selected.getWattage() / 1000.0) * hours;
 
-        // Create UsageRecord (M1's class) and log it
         UsageRecord record = new UsageRecord(selected, hours, LocalDate.now());
         energyManager.logUsage(record);
 
-        // Insert into BST (UsageTree) with the daily kWh as key
+        
         usageTree.insert(selected, dailyKwh);
 
         System.out.printf("  ✓ Logged: %s used for %.1f hours = %.3f kWh%n",
                 selected.getName(), hours, dailyKwh);
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 4 — Energy Report
-    // ══════════════════════════════════════════════
-
-    /**
-     * Calls M3's EnergyAnalyzer to display:
-     * - Average consumption
-     * - Devices above threshold
-     * - Grouped by category
-     */
+    //shows avg consumption ,device above threshold and category 
     private static void showEnergyReport() {
         System.out.println("\n  ── Energy Analysis Report ──");
 
@@ -248,18 +183,10 @@ public class Main {
             return;
         }
 
-        // M3 handles all the Stream + Lambda magic here
         energyAnalyzer.displayReport(records);
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 5 — Carbon Footprint
-    // ══════════════════════════════════════════════
-
-    /**
-     * Uses M3's CarbonCalculator.
-     * Formula: kWh × CO2_FACTOR (from Constants.java)
-     */
+    //calulating carboonfootprinting 
     private static void showCarbonFootprint() {
         System.out.println("\n  ── Carbon Footprint Report ──");
 
@@ -272,20 +199,14 @@ public class Main {
         carbonCalc.displayCarbonReport(records);
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 6 — Show Usage Tree (BST)
-    // ══════════════════════════════════════════════
-
-    /**
-     * Displays the BST in-order → devices sorted low to high kWh.
-     * Also shows the biggest and smallest consumer.
-     */
+    //display BST in order low to high and bigest and smallest consumer 
     private static void showUsageTree() {
         System.out.println("\n  ── Usage Tree (BST — Low to High kWh) ──");
 
         usageTree.inOrderDisplay();
 
-        // Extra info: highest and lowest consumer
+
+        
         Device highest = usageTree.getHighestConsumer();
         Device lowest  = usageTree.getLowestConsumer();
 
@@ -295,14 +216,7 @@ public class Main {
         }
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 7 — Connect Devices (Graph Edge)
-    // ══════════════════════════════════════════════
-
-    /**
-     * Links two devices as co-running (adds an edge in the graph).
-     * User picks two devices from the list.
-     */
+    //linking 2 devices as co-running devices 
     private static void connectDevices() {
         System.out.println("\n  ── Connect Co-running Devices ──");
         System.out.println("  (Connect devices that run at the same time)\n");
@@ -313,7 +227,7 @@ public class Main {
             return;
         }
 
-        // Show list
+       
         for (int i = 0; i < devices.size(); i++) {
             System.out.println("  " + (i + 1) + ". " + devices.get(i).getName());
         }
@@ -326,7 +240,6 @@ public class Main {
         System.out.print("  Select second device: ");
         int second = readIntInput() - 1;
 
-        // Validate selection
         if (first < 0 || second < 0
                 || first >= devices.size() || second >= devices.size()) {
             System.out.println("  [Invalid selection]");
@@ -341,24 +254,17 @@ public class Main {
         Device d1 = devices.get(first);
         Device d2 = devices.get(second);
 
-        connectDevices(d1, d2);   // helper method below
+        connectDevices(d1, d2); 
     }
 
-    /** Helper: connects two Device objects in the graph */
+   
     private static void connectDevices(Device d1, Device d2) {
         deviceGraph.connectDevices(d1, d2);
         System.out.println("  ✓ Connected: " + d1.getName()
                 + " ↔ " + d2.getName());
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 8 — Find Cluster (BFS)
-    // ══════════════════════════════════════════════
-
-    /**
-     * Runs BFS from a selected device.
-     * Shows all co-running devices (the cluster) and total wattage.
-     */
+    //run bfs to selected devics and show the co-runninbg devices 
     private static void findCluster() {
         System.out.println("\n  ── Find Co-running Cluster (BFS) ──");
 
@@ -392,27 +298,14 @@ public class Main {
                 (totalWatts / 1000.0) * Constants.TARIFF_RATE);
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 9 — Show All Clusters
-    // ══════════════════════════════════════════════
-
-    /**
-     * Finds all connected components in the graph and displays them.
-     */
+  //show all the cluster 
     private static void showAllClusters() {
         System.out.println("\n  ── All Device Clusters ──");
         deviceGraph.displayGraph();
         deviceGraph.displayAllClusters();
     }
-
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 10 — Export Report to File
-    // ══════════════════════════════════════════════
-
-    /**
-     * Exports the BST in-order list to a .txt file.
-     * File is saved in the project's root directory.
-     */
+    
+//exporting a file 
     private static void exportReport() {
         System.out.println("\n  ── Export Usage Report ──");
 
@@ -424,7 +317,7 @@ public class Main {
         System.out.print("  Enter filename (e.g. report.txt): ");
         String filename = scanner.nextLine().trim();
 
-        // Default filename if user presses enter without typing
+       
         if (filename.isEmpty()) {
             filename = "energy_report.txt";
             System.out.println("  [Using default: energy_report.txt]");
@@ -433,14 +326,7 @@ public class Main {
         usageTree.exportReport(filename);
     }
 
-    // ══════════════════════════════════════════════
-    //  MENU OPTION 11 — Top Energy Waster
-    // ══════════════════════════════════════════════
-
-    /**
-     * Uses M3's EnergyAnalyzer to find the device consuming the most energy.
-     * Cross-checks with UsageTree's getHighestConsumer() (BST rightmost node).
-     */
+   //membes have already done it just taking from that 
     private static void showTopWaster() {
         System.out.println("\n  ── Top Energy Waster ──");
 
@@ -456,35 +342,23 @@ public class Main {
         System.out.println("     Category : " + topFromTree.getCategory());
         System.out.println("     Wattage  : " + topFromTree.getWattage() + "W");
 
-        // Also call M3's analyzer for stream-based top waster
+       
         List<UsageRecord> records = energyManager.getAllRecords();
         if (!records.isEmpty()) {
             energyAnalyzer.displayTopWaster(records);
         }
     }
 
-    // ══════════════════════════════════════════════
-    //  INPUT HELPERS — Validation methods
-    // ══════════════════════════════════════════════
-
-    /**
-     * Safely reads an integer from the user.
-     * If they type something that isn't a number, returns -1 (handled by callers).
-     */
+  
     private static int readIntInput() {
         try {
             String line = scanner.nextLine().trim();
             return Integer.parseInt(line);
         } catch (NumberFormatException e) {
-            // User typed letters instead of a number
             return -1;
         }
     }
 
-    /**
-     * Safely reads a double (decimal number) from the user.
-     * Returns -1 if input is invalid.
-     */
     private static double readDoubleInput() {
         try {
             String line = scanner.nextLine().trim();
@@ -494,11 +368,6 @@ public class Main {
         }
     }
 
-    // ══════════════════════════════════════════════
-    //  DISPLAY HELPERS
-    // ══════════════════════════════════════════════
-
-    /** Prints the welcome banner shown at startup */
     private static void printBanner() {
         System.out.println("╔══════════════════════════════════════════╗");
         System.out.println("║      SMART ENERGY CONSUMPTION TRACKER   ║");
@@ -507,7 +376,7 @@ public class Main {
         System.out.println();
     }
 
-    /** Prints the main menu options */
+
     private static void printMenu() {
         System.out.println("┌─────────────────────────────────────────┐");
         System.out.println("│               MAIN MENU                 │");
